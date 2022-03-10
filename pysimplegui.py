@@ -15,7 +15,7 @@ from gi.repository import Gtk
 # Define functions
 
 def install_app(app):
-    window.Minimize()
+    window.Hide()
     os.popen(f'''{DIRECTORY}/etc/terminal-run '
     DIRECTORY={DIRECTORY}
     source "{DIRECTORY}/api"
@@ -32,10 +32,10 @@ def install_app(app):
       echo -e "\nClose this window to exit."
       read enter 
     fi' 'Installing ''' + app + '''' ''').read()
-    window.TKroot.deiconify()
+    window.UnHide()
 
 def uninstall_app(app):
-    window.Minimize()
+    window.Hide()
     os.popen(f'''{DIRECTORY}/etc/terminal-run '
     DIRECTORY={DIRECTORY}
     source "{DIRECTORY}/api"
@@ -52,7 +52,7 @@ def uninstall_app(app):
       echo -e "\nClose this window to exit."
       read enter 
     fi' 'Unnstalling ''' + app + '''' ''').read()
-    window.TKroot.deiconify()
+    window.UnHide()
 
 def back_to_category_list():
     global app_list
@@ -275,7 +275,7 @@ layout = [
 
 # Create window
 window = sg.Window("Pi-Apps", layout,
-                   icon=f'{DIRECTORY}/icons/logo.png', finalize=True, size=(1250, 800),background_color='#00ff00')
+                   icon=f'{DIRECTORY}/icons/logo.png', finalize=True, size=(1250, 800))
 
 
 #https://stackoverflow.com/questions/38871450/how-can-i-get-the-default-colors-in-gtk
@@ -296,7 +296,7 @@ window.bind('<Control-u>', '-UNINSTALL-')
 window.bind('<Control-s>', '-SCRIPTS-')
 window.bind('<Control-c>', '-CREDITS-')
 window.bind('<Alt-s>', '-GO TO SEARCH-')
-
+window['-SEARCH-'].set_focus()
 
 # Run the Event Loop
 while True:
@@ -460,7 +460,7 @@ while True:
                 if credits_text != '':
                     sg.Window('Credits', [[sg.T(credits_text)], [sg.OK(s=10)]]).read(close=True)
                 else:
-                    sg.Window('Credits', [[sg.T('No credit found for ' + app + '.\n')], [sg.OK(s=10)]], size=(500, 100)).read(close=True)
+                    sg.Window('Credits', [[sg.T('No credit found for ' + app + '.\n')], [sg.OK(s=10)]]).read(close=True)
             else:
                 pass #category is selected, no credits available, skip
         else:
