@@ -1,0 +1,174 @@
+Aewan Editor
+Alacritty Terminal
+All Is Well
+Amiberry
+AndroidBuddy
+Angry IP scanner
+AntiMicroX
+AnyDesk
+Arduino
+AstroMenace
+Audacious
+Audacity
+Autostar
+BalenaEtcher
+BleachBit
+Bongo Cam
+Caprine
+Cawbird
+Chiaki
+Clam Antivirus
+CommanderPi
+Cura
+Disk Usage Analyzer
+Downgrade Chromium
+Drawing
+DroidCam
+Eagle CAD
+Email Checker
+Epiphany
+Exagear
+Falkon
+Filezilla
+Firefox Rapid Release
+Flameshot
+FreeCAD
+Geany Dark Mode
+GParted
+Guake Terminal
+HTTrack Website Copier
+Inkscape
+Intellij IDEA
+jGRASP IDE
+KeePassXC
+Kolourpaint
+Lego Digital Designer
+LibreCAD
+Lightpad
+Mac OS Theme
+MatterControl
+Microsoft Teams
+Minecraft Bedrock
+Minecraft Java
+Minecraft Java MultiMC5
+Minecraft Java Server
+Minecraft Pi (Modded)
+Mission Planner
+More RAM
+Nautilus
+Notepad ++
+OpenSCAD
+Pale Moon
+Persepolis Download Manager
+Pi-Apps Terminal Plugin (bash)
+Pi-Apps Terminal Plugin (python)
+PiSafe
+PPSSPP (PSP emulator)
+PrusaSlicer
+Pycharm CE
+Quartz
+Raspi2png
+Remarkable
+Scratch 2
+Snapdrop
+Snap Store
+StackEdit
+Steam
+Stunt Rally
+Synaptic
+SysMonTask
+TeamViewer Host
+Telegram
+Transmission
+Turbowarp
+Ulauncher
+Update Buddy
+USBImager
+VeraCrypt
+Visual Studio Code
+Vivaldi
+VMware Horizon Client
+WACUP (new WinAmp)
+Web Apps
+Wechat
+WhatsApp
+Windows Flasher
+Windows Screensavers
+Xtreme Download Manager
+Zoom PWA
+BlockBench
+BlockPi
+Box86
+Boxy SVG
+Browsh
+btop++
+Chromium Widevine
+CloudBuddy
+Codex
+Color Emoji font
+Conky
+Conky Rings
+Cool Retro Term
+DDnet
+Deluge
+Descent 1
+Descent 2
+Deskreen
+Discord
+Doom 3
+eDEX-UI
+FF Multi Converter
+FreeTube
+Fritzing
+Geekbench
+GIMP
+Github-CLI
+Godot
+Google Meet
+Heroes 2
+Https File Server
+Kodi
+LibreOffice
+Libreoffice MS theme
+LibrePCB
+LineRider
+LinuxCNC
+Lokinet
+Microsoft PowerShell
+Min
+MuseScore
+Nemo
+NixNote2
+Node.js
+OBS Studio
+Oomox Theme Designer
+PiGro
+piKiss
+PiKISS GUI
+Pi Power Tools
+Powerline-Shell
+Processing IDE
+Puffin
+QEMU
+Scrcpy
+Screenshot
+Shotwell
+SimpleScreenRecorder
+Sonic Pi
+SpeedTest-CLI
+Sublime Text
+Sysmon
+Temps
+Tetris CLI
+Thunderbird
+Timeshift
+tldr
+Tor
+Unciv
+VSCodium
+Windows 10 Theme
+Wine (x86)
+WPS Office
+XSnow
+YouTubuddy
+Zoom
