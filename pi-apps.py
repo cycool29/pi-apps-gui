@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Import modules
+import random
 import textwrap
 import webbrowser
 import os
@@ -9,8 +10,6 @@ import PySimpleGUI as sg
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
-import random
-
 
 
 # Define functions
@@ -86,22 +85,21 @@ def show_category(category):
         category_apps = os.popen(
             f'{DIRECTORY}/api list_apps cpu_installable | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
 
-    elif category == 'Installed':  
+    elif category == 'Installed':
         category_apps = os.popen(
             f'{DIRECTORY}/api list_apps installed').read().split('\n')
 
-    else: #Other categories
+    else:  # Other categories
         category_apps = os.popen(
             f'cat  {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides 2>/dev/null | grep {category} | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
-
 
     i = 0
     app_list_data = sg.TreeData()
     app_list = []
-    
+
     if shuffle_app_list == True:
         random.shuffle(category_apps)
-        
+
     for app in category_apps:
         if app != 'template':
             app_list.append(app)
@@ -126,7 +124,7 @@ def load_app_info(app):
     if status_text == '':
         status_text = 'uninstalled'
     website_text_original = textwrap.wrap(os.popen(f'cat "{DIRECTORY}/apps/' +
-                            app + '/website" 2>/dev/null').read().rstrip('\n'), 75, replace_whitespace=False)
+                                                   app + '/website" 2>/dev/null').read().rstrip('\n'), 75, replace_whitespace=False)
     website_text = ''
     if len(website_text_original) > 1:
         for line in website_text_original:
@@ -137,7 +135,8 @@ def load_app_info(app):
     description_text = os.popen(f'cat "{DIRECTORY}/apps/' +
                                 app + '/description"').read()
 
-    users_count = int(os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))
+    users_count = int(
+        os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))
 
     window["-APP NAME-"].update(app,
                                 font=default_font_name + ' ' + str(20) + ' bold')
@@ -150,7 +149,7 @@ def load_app_info(app):
     else:
         window["-WEBSITE_1-"].update("")
         window["-WEBSITE_2-"].update('')
-    
+
     if users_count != '':
         window["-USERS_1-"].update(' ' + str(users_count))
         if users_count >= 1500 and users_count < 10000:
@@ -161,7 +160,7 @@ def load_app_info(app):
             window["-USERS_2-"].update('users')
         else:
             window["-USERS-"].update("user")
-            
+
     window["-GITHUB BUTTON-"].update(visible=False)
     window["-WEBSITE BUTTON-"].update(visible=False)
     window["-DESCRIPTION-"].update(description_text)
@@ -171,6 +170,7 @@ def load_app_info(app):
         window["-SCRIPTS-"].update(visible=False)
     window["-CREDITS-"].update(visible=True)
     window["-UNINSTALL-"].update(visible=False)
+    window["-ERRORS-"].update(visible=True)
     window["-ERRORS-"].update(visible=False)
 
     if status_text == 'corrupted':
@@ -297,7 +297,8 @@ app_info_column = [
              key="-STATUS-", font=default_font)],
     [sg.Text(key="-WEBSITE_1-", font=default_font), sg.Text(key="-WEBSITE_2-",
                                                             click_submits=True, text_color='blue', font=default_font + ' underline')],
-    [sg.Text(key="-USERS_1-", font=default_font + ' bold', pad=(0, 0)), sg.Text(key="-USERS_2-", font=default_font,pad=(0, 0))],
+    [sg.Text(key="-USERS_1-", font=default_font + ' bold', pad=(0, 0)),
+     sg.Text(key="-USERS_2-", font=default_font, pad=(0, 0))],
 
     [sg.Multiline("""Let's be honest: Linux is harder to master than Windows. 
 Sometimes it's not user-friendly, and following an outdated tutorial may break your Raspberry Pi's operating system.
@@ -309,13 +310,15 @@ Pi-Apps now serves over 1,000,000 people and hosts nearly 200 apps.""", key="-DE
 
     [sg.Column([[sg.Button(key="-CREDITS-",
                button_text="Credits", font=default_font, tooltip='See who made the app and who put it on Pi-Apps', visible=False)]], pad=(0, 0)),
-     sg.Column([[sg.Button(key="-INSTALL OR UNINSTALL-",
-               image_filename=f'{DIRECTORY}/icons/install.png', button_text="  ", visible=False)]]),
      sg.Column([[sg.Button(key="-SCRIPTS-",
-               tooltip="Script", button_text='   ', image_filename=f'{DIRECTORY}/icons/shellscript.png', font=default_font, visible=False,)]]),
+               tooltip="Feel free to see how an app is installed or uninstalled!\nPerfect for learning or troubleshooting.", button_text='   ', image_filename=f'{DIRECTORY}/icons/shellscript.png', font=default_font, visible=False,)]]),
+     sg.Column([[sg.Button(key="-ERRORS-", tooltip="Errors", button_text='   ',
+               image_filename=f'{DIRECTORY}/icons/log-file.png', font=default_font, visible=False,)]]),
+     sg.Text('', pad=(200, 0)),
      sg.Column([[sg.Button(key="-UNINSTALL-",
-               image_filename=f'{DIRECTORY}/icons/uninstall.png', button_text="  ", visible=False,)]],), sg.Column([[sg.Button(key="-ERRORS-",
-                                                                                                                               tooltip="Errors", button_text='   ', image_filename=f'{DIRECTORY}/icons/log-file.png', font=default_font, visible=False,)]]), ]
+               image_filename=f'{DIRECTORY}/icons/uninstall.png', button_text="  ", visible=False,), sg.Button(key="-INSTALL OR UNINSTALL-",
+               image_filename=f'{DIRECTORY}/icons/install.png', button_text="  ", visible=False)]],),
+     ]
 ]
 
 
@@ -406,11 +409,10 @@ while True:
                 window['-APP LIST-'].update(app_list_data)
                 # Make back button visible so users can return to category list
                 window['-MENU BACK-'].update(visible=True)
-                
+
                 ids = window['-APP LIST-'].Widget.identify_row(1)
                 key = window['-APP LIST-'].IdToKey[ids]
                 window['-APP LIST-'].Widget.selection_set(ids)
-
 
             else:  # search query is empty, back to category
                 if current_category != 'Category List':
