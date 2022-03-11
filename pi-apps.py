@@ -125,11 +125,19 @@ def load_app_info(app):
         f'{DIRECTORY}/api app_status "' + app + '"').read().rstrip('\n')
     if status_text == '':
         status_text = 'uninstalled'
-    website_text = os.popen(f'cat "{DIRECTORY}/apps/' +
-                            app + '/website" 2>/dev/null').read().rstrip('\n')
+    website_text_original = textwrap.wrap(os.popen(f'cat "{DIRECTORY}/apps/' +
+                            app + '/website" 2>/dev/null').read().rstrip('\n'), 75, replace_whitespace=False)
+    website_text = ''
+    if len(website_text_original) > 1:
+        for line in website_text_original:
+            website_text += line + '\n'
+    else:
+        website_text = website_text_original[0]
 
     description_text = os.popen(f'cat "{DIRECTORY}/apps/' +
                                 app + '/description"').read()
+
+    users_count = int(os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))
 
     window["-APP NAME-"].update(app,
                                 font=default_font_name + ' ' + str(20) + ' bold')
@@ -142,7 +150,18 @@ def load_app_info(app):
     else:
         window["-WEBSITE_1-"].update("")
         window["-WEBSITE_2-"].update('')
-
+    
+    if users_count != '':
+        window["-USERS_1-"].update(' ' + str(users_count))
+        if users_count >= 1500 and users_count < 10000:
+            window["-USERS_2-"].update('users!')
+        elif users_count >= 10000:
+            window["-USERS_2-"].update('users!!')
+        elif users_count > 1:
+            window["-USERS_2-"].update('users')
+        else:
+            window["-USERS-"].update("user")
+            
     window["-GITHUB BUTTON-"].update(visible=False)
     window["-WEBSITE BUTTON-"].update(visible=False)
     window["-DESCRIPTION-"].update(description_text)
@@ -194,6 +213,16 @@ try:
             shuffle_app_list = False
 except:
     shuffle_app_list = False
+
+
+try:
+    with open(f'{DIRECTORY}/data/settings/Show Edit button', 'r') as f:
+        if f.read().replace('\n', '') == 'Yes':
+            show_edit_button = True
+        elif f.read().replace('\n', '') == 'No':
+            show_edit_button = False
+except:
+    show_edit_button = False
 
 font = Gtk.Settings.get_default().get_property("gtk-font-name")
 default_font_name = font.split(',')[0].replace(' ', '')
@@ -268,7 +297,7 @@ app_info_column = [
              key="-STATUS-", font=default_font)],
     [sg.Text(key="-WEBSITE_1-", font=default_font), sg.Text(key="-WEBSITE_2-",
                                                             click_submits=True, text_color='blue', font=default_font + ' underline')],
-    [sg.Text(key="-USERS-", font=default_font)],
+    [sg.Text(key="-USERS_1-", font=default_font + ' bold',pad=(0, 0)), sg.Text(key="-USERS_2-", font=default_font,pad=(0, 0))],
 
     [sg.Multiline("""Let's be honest: Linux is harder to master than Windows. 
 Sometimes it's not user-friendly, and following an outdated tutorial may break your Raspberry Pi's operating system.
@@ -454,9 +483,7 @@ while True:
             app = app_list_data.tree_dict[key].text[1:]
             if app not in app_categories:
                 with open(f'{DIRECTORY}/apps/' + app + '/description') as f:
-                    first_lines = textwrap.wrap(f.readline(), 60)
-                    for line in first_lines:
-                        first_line = first_line + line + '\n'
+                    first_line = textwrap.fill(f.readline(), 70)
                 window['-TOOLTIP-'].update(first_line)
                 # window['-APP LIST-'].set_tooltip(tooltip_text=first_line)
 
