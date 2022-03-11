@@ -92,7 +92,7 @@ def show_category(category):
 
     else: #Other categories
         category_apps = os.popen(
-            f'cat  {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides | grep {category} | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
+            f'cat  {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides 2>/dev/null | grep {category} | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
 
 
     i = 0
@@ -209,7 +209,7 @@ try:
     with open(f'{DIRECTORY}/data/settings/Shuffle App list', 'r') as f:
         if f.read().replace('\n', '') == 'Yes':
             shuffle_app_list = True
-        elif f.read().replace('\n', '') == 'No':
+        else:
             shuffle_app_list = False
 except:
     shuffle_app_list = False
@@ -297,7 +297,7 @@ app_info_column = [
              key="-STATUS-", font=default_font)],
     [sg.Text(key="-WEBSITE_1-", font=default_font), sg.Text(key="-WEBSITE_2-",
                                                             click_submits=True, text_color='blue', font=default_font + ' underline')],
-    [sg.Text(key="-USERS_1-", font=default_font + ' bold',pad=(0, 0)), sg.Text(key="-USERS_2-", font=default_font,pad=(0, 0))],
+    [sg.Text(key="-USERS_1-", font=default_font + ' bold', pad=(0, 0)), sg.Text(key="-USERS_2-", font=default_font,pad=(0, 0))],
 
     [sg.Multiline("""Let's be honest: Linux is harder to master than Windows. 
 Sometimes it's not user-friendly, and following an outdated tutorial may break your Raspberry Pi's operating system.
@@ -354,6 +354,7 @@ window.bind('<Control-c>', '-CREDITS-')
 window.bind('<Alt-s>', '-GO TO SEARCH-')
 window['-SEARCH-'].set_focus()
 
+
 # Run the Event Loop
 while True:
     # Reset variables
@@ -405,6 +406,11 @@ while True:
                 window['-APP LIST-'].update(app_list_data)
                 # Make back button visible so users can return to category list
                 window['-MENU BACK-'].update(visible=True)
+                
+                ids = window['-APP LIST-'].Widget.identify_row(1)
+                key = window['-APP LIST-'].IdToKey[ids]
+                window['-APP LIST-'].Widget.selection_set(ids)
+
 
             else:  # search query is empty, back to category
                 if current_category != 'Category List':
