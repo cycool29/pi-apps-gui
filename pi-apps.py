@@ -72,7 +72,7 @@ def back_to_category_list():
     window['-APP LIST-'].update(app_list_data)
     window['-MENU BACK-'].update(visible=False)
     window['-TOOLTIP-'].update('')
-    window['-SEARCH-'].update('')
+    window['-SEARCH BAR-'].update('')
 
     current_category = 'Category List'
 
@@ -109,7 +109,7 @@ def show_category(category):
 
     window['-APP LIST-'].update(app_list_data)
     window['-MENU BACK-'].update(visible=True)
-    window['-SEARCH-'].update('')
+    window['-SEARCH BAR-'].update('')
     window['-TOOLTIP-'].update(first_line)
     current_category = category
 
@@ -126,11 +126,12 @@ def load_app_info(app):
     website_text_original = textwrap.wrap(os.popen(f'cat "{DIRECTORY}/apps/' +
                                                    app + '/website" 2>/dev/null').read().rstrip('\n'), 75, replace_whitespace=False)
     website_text = ''
-    if len(website_text_original) > 1:
-        for line in website_text_original:
-            website_text += line + '\n'
-    else:
-        website_text = website_text_original[0]
+    if website_text_original != []:
+        if len(website_text_original) > 1:
+            for line in website_text_original:
+                website_text += line + '\n'
+        else:
+            website_text = website_text_original[0]
 
     description_text = os.popen(f'cat "{DIRECTORY}/apps/' +
                                 app + '/description"').read()
@@ -268,9 +269,8 @@ search_column = [
     ],
     [
         sg.Text("Search apps: ", font=default_font),
-        sg.In(size=(25, 1), enable_events=True,
-              key="-SEARCH-", font=default_font),
-        sg.Button("Clear", font=default_font, key='-CLEAR SEARCH-'),
+        sg.In(size=(25, 1), enable_events=True, font=default_font, key='-SEARCH BAR-'),
+        sg.Button("Search", font=default_font, key='-SEARCH-', bind_return_key=True),
     ],
     [
         sg.Text('')
@@ -314,10 +314,11 @@ Pi-Apps now serves over 1,000,000 people and hosts nearly 200 apps.""", key="-DE
                tooltip="Feel free to see how an app is installed or uninstalled!\nPerfect for learning or troubleshooting.", button_text='   ', image_filename=f'{DIRECTORY}/icons/shellscript.png', font=default_font, visible=False,)]]),
      sg.Column([[sg.Button(key="-ERRORS-", tooltip="Errors", button_text='   ',
                image_filename=f'{DIRECTORY}/icons/log-file.png', font=default_font, visible=False,)]]),
-     sg.Text('', pad=(200, 0)),
+     sg.Text('',pad=(50, 0)),
      sg.Column([[sg.Button(key="-UNINSTALL-",
-               image_filename=f'{DIRECTORY}/icons/uninstall.png', button_text="  ", visible=False,), sg.Button(key="-INSTALL OR UNINSTALL-",
-               image_filename=f'{DIRECTORY}/icons/install.png', button_text="  ", visible=False)]],),
+               image_filename=f'{DIRECTORY}/icons/uninstall.png', button_text="  ", visible=False)]]),
+     sg.Column([[sg.Button(key="-INSTALL OR UNINSTALL-",
+               image_filename=f'{DIRECTORY}/icons/install.png', button_text="  ", visible=False)]]),
      ]
 ]
 
@@ -355,7 +356,7 @@ window.bind('<Control-u>', '-UNINSTALL-')
 window.bind('<Control-s>', '-SCRIPTS-')
 window.bind('<Control-c>', '-CREDITS-')
 window.bind('<Alt-s>', '-GO TO SEARCH-')
-window['-SEARCH-'].set_focus()
+window['-SEARCH BAR-'].set_focus()
 
 
 # Run the Event Loop
@@ -373,7 +374,7 @@ while True:
         break
 
     if event == "-SEARCH-":
-        search_query = values["-SEARCH-"]
+        search_query = values["-SEARCH BAR-"]
         search_result = []
         try:
             if search_query != '':  # If search query is not empty
@@ -413,6 +414,8 @@ while True:
                 ids = window['-APP LIST-'].Widget.identify_row(1)
                 key = window['-APP LIST-'].IdToKey[ids]
                 window['-APP LIST-'].Widget.selection_set(ids)
+                
+                window['-APP LIST-'].set_focus()
 
             else:  # search query is empty, back to category
                 if current_category != 'Category List':
@@ -552,7 +555,7 @@ while True:
             pass
 
     elif event == '-GO TO SEARCH-':  # When alt+s is pressed, focus to search bar
-        window['-SEARCH-'].set_focus()
+        window['-SEARCH BAR-'].set_focus()
 
     elif event == '-ERRORS-':  # Show error report
         if current_app != '':
