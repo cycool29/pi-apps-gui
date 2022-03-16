@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # Import modules
-import signal
+from gi.repository import Gtk
+import time
 import sys
 import random
 import textwrap
@@ -11,13 +12,20 @@ import os.path
 import PySimpleGUI as sg
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
 
 
 # Define functions
 
+def debug(message):
+    if enable_debug == True:
+        print(message)
+    else:
+        pass
+
+
 def install_app(app):
     window.Hide()
+    debug('Installing ' + app + '.')
     os.popen(f'''{DIRECTORY}/etc/terminal-run '
     DIRECTORY={DIRECTORY}
     source "{DIRECTORY}/api"
@@ -34,11 +42,13 @@ def install_app(app):
       echo -e "\nClose this window to exit."
       read enter 
     fi' 'Installing ''' + app + '''' ''').read()
+    debug('Done installing ' + app + '.')
     window.UnHide()
 
 
 def uninstall_app(app):
     window.Hide()
+    debug('Uninstalling ' + app + '.')
     os.popen(f'''{DIRECTORY}/etc/terminal-run '
     DIRECTORY={DIRECTORY}
     source "{DIRECTORY}/api"
@@ -55,6 +65,7 @@ def uninstall_app(app):
       echo -e "\nClose this window to exit."
       read enter 
     fi' 'Unnstalling ''' + app + '''' ''').read()
+    debug('Done uninstalling ' + app + '.')
     window.UnHide()
 
 
@@ -62,6 +73,7 @@ def back_to_category_list():
     global app_list
     global current_category
     global app_list_data
+    debug('Returning to Category List.')
     app_list = []
     i = 0
     app_list_data = sg.TreeData()
@@ -73,10 +85,13 @@ def back_to_category_list():
 
     window['-APP LIST-'].update(app_list_data)
     window['-MENU BACK-'].update(visible=False)
+    window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size((50, 0))
+
     window['-TOOLTIP-'].update('')
     window['-SEARCH BAR-'].update('')
 
     current_category = 'Category List'
+    debug('Done returning Category List')
 
 
 def show_category(category):
@@ -85,16 +100,19 @@ def show_category(category):
     global current_category
     global current_app
     if category == 'All Apps':
+        debug('\nShowing All Apps category.')
         category_apps = os.popen(
             f'{DIRECTORY}/api list_apps cpu_installable | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
 
     elif category == 'Installed':
+        debug('\nShowing Installed category.')
         category_apps = os.popen(
             f'{DIRECTORY}/api list_apps installed').read().split('\n')
 
     else:  # Other categories
+        debug('\nShowing ' + category + ' category.')
         category_apps = os.popen(
-            f'cat  {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides 2>/dev/null | grep {category} | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
+            f'cat {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides 2>/dev/null | grep {category} | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
 
     i = 0
     app_list_data = sg.TreeData()
@@ -111,12 +129,13 @@ def show_category(category):
             i += 1
 
     window['-APP LIST-'].update(app_list_data)
-    print(current_app)
     current_app = ''
     window['-MENU BACK-'].update(visible=True)
+    window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size((43, 0))
     window['-SEARCH BAR-'].update('')
-    window['-TOOLTIP-'].update(first_line)
+    window['-TOOLTIP-'].update('')
     current_category = category
+    debug('Done showing ' + category + ' category.')
 
 
 def load_app_info(app):
@@ -125,10 +144,13 @@ def load_app_info(app):
     global current_app
     global description_text
     global button_list
+
+    debug('\nLoading ' + app + ' info.')
     status_text = os.popen(
         f'{DIRECTORY}/api app_status "' + app + '" 2>/dev/null').read().rstrip('\n')
     if status_text == '':
         status_text = 'uninstalled'
+    debug(app + "'s status: " + status_text)
     website_text_original = textwrap.wrap(os.popen(f'cat "{DIRECTORY}/apps/' +
                                                    app + '/website" 2>/dev/null').read().rstrip('\n'), 75, replace_whitespace=False)
     website_text = ''
@@ -138,11 +160,15 @@ def load_app_info(app):
                 website_text += line + '\n'
         else:
             website_text = website_text_original[0]
+        debug(app + "'s website: " + website_text)
 
     description_text = os.popen(f'cat "{DIRECTORY}/apps/' +
                                 app + '/description"').read()
+    debug(app + "'s description: \n" + description_text)
 
-    users_count = int(os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))
+    users_count = int(
+        os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))
+    debug(app + "'s users count: " + str(users_count))
 
     window["-APP NAME-"].update(app,
                                 font=default_font_name + ' ' + str(20) + ' bold')
@@ -171,6 +197,7 @@ def load_app_info(app):
     window["-WEBSITE BUTTON-"].update(visible=False)
     window["-DESCRIPTION-"].update(description_text)
 
+    debug('Loading buttons.')
     buttons = ['-BUTTON 1-', '-BUTTON 2-', '-BUTTON 3-',
                '-BUTTON 4-', '-BUTTON 5-', '-BUTTON 6-']
 
@@ -258,25 +285,31 @@ def load_app_info(app):
             window[buttons[n]].set_tooltip('')
             button_list.append('errors')
 
+        debug('Added ' + button + ' button in ' + buttons[n])
         n += 1
 
+    debug('Done loading buttons.')
+    debug('Done loading ' + app + '.')
     current_app = app
 
 
 # Initialize configs
+
+if '--debug' in sys.argv:
+    enable_debug = True
+else:
+    enable_debug = False
+
 if "DIRECTORY" not in os.environ:
     if os.path.exists(os.path.dirname(os.path.abspath(__file__)) + '/api') is True:
         DIRECTORY = os.path.dirname(os.path.abspath(__file__))
     else:
-        DIRECTORY = '/home/pi/pi-apps'
+        DIRECTORY = os.getenv('HOME') + '/pi-apps'
 else:
     DIRECTORY = os.getenv("DIRECTORY")
 
-apps = []
+debug('DIRECTORY: ' + DIRECTORY)
 
-for app in sorted(os.listdir(f'{DIRECTORY}/apps')):
-    if app != 'template':
-        apps.append(app)
 
 # Settings
 
@@ -289,20 +322,25 @@ try:
 except:
     shuffle_app_list = False
 
+debug('Shuffle app list: ' + str(shuffle_app_list))
 
 try:
     with open(f'{DIRECTORY}/data/settings/Show Edit button', 'r') as f:
         if f.read().replace('\n', '') == 'Yes':
             show_edit_button = True
-        elif f.read().replace('\n', '') == 'No':
+        else:
             show_edit_button = False
 except:
     show_edit_button = False
+
+debug('Show edit button: ' + str(show_edit_button))
 
 font = Gtk.Settings.get_default().get_property("gtk-font-name")
 default_font_name = font.split(',')[0].replace(' ', '')
 default_font_size = font[-2:]
 default_font = default_font_name + ' ' + default_font_size
+debug('Font: ' + default_font)
+
 old_list_index = (None, None)
 current_app = ''
 
@@ -318,7 +356,7 @@ app_categories = [
     'Browsers',
     'Appearance',
 ]
-
+debug('Categories: ' + str(app_categories))
 
 app_list = []
 i = 0
@@ -367,8 +405,12 @@ search_column = [
                 select_mode='browse', enable_events=True, key='-APP LIST-', font=default_font, col0_width=40, row_height=30, auto_size_columns=False),
     ],
     [
-        sg.Button(key='-MENU BACK-',
-                  image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False)
+        sg.pin(sg.Button(key='-MENU BACK-',
+               image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False)),
+        sg.pin(sg.Text('', size=(50, 0),
+               key='-SEPARATOR BETWEEN MENU BACK AND UPDATES-')),
+        sg.pin(sg.Button(key='-UPDATE-',
+               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ',)),
     ],
 ]
 
@@ -496,6 +538,8 @@ while True:
                 window['-APP LIST-'].update(app_list_data)
                 # Make back button visible so users can return to category list
                 window['-MENU BACK-'].update(visible=True)
+                window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size(
+                    (43, 0))
 
                 ids = window['-APP LIST-'].Widget.identify_row(1)
                 key = window['-APP LIST-'].IdToKey[ids]
@@ -518,12 +562,14 @@ while True:
         if window.Element('-APP LIST-').SelectedRows != []:
             current_app = app_list[window.Element(
                 '-APP LIST-').SelectedRows[0]]
-        print(current_app)
-        if current_app in app_categories:  # If the item is a category, enter the category
+
+        if current_app == '':
+            pass
+        elif current_app in app_categories:  # If the item is a category, enter the category
             current_category = current_app
             show_category(current_category)
         elif current_app in os.popen(
-            f'{DIRECTORY}/api list_apps cpu_installable | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n'):
+                f'{DIRECTORY}/api list_apps cpu_installable | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n'):
             # try:
             app = current_app
             load_app_info(app)
@@ -563,6 +609,7 @@ while True:
 
     elif event == '-MENU BACK-':  # When clicked on back button, return to category list
         back_to_category_list()
+        window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size((50, 0))
 
     elif event == '-APP LIST-+MOTION+':  # When mouse is in app list, detect what entry and show tooltip
         e = window['-APP LIST-'].user_bind_event
@@ -589,9 +636,10 @@ while True:
     elif event == '-APP LIST-+MOUSE AWAY+':  # When mouse leave app list, clear tooltips
         window['-TOOLTIP-'].update('')
 
-    elif event == '-BUTTON 1-' or  event == '-BUTTON 2-' or  event == '-BUTTON 3-' or event == '-BUTTON 4-' or event == '-BUTTON 5-' or event == '-BUTTON 6-' :
-        operation = button_list[int(''.join([n for n in event if n.isdigit()])) - 1]
-        
+    elif event == '-BUTTON 1-' or event == '-BUTTON 2-' or event == '-BUTTON 3-' or event == '-BUTTON 4-' or event == '-BUTTON 5-' or event == '-BUTTON 6-':
+        operation = button_list[int(
+            ''.join([n for n in event if n.isdigit()])) - 1]
+
         if operation == 'install':
             if current_app != '' and current_app not in app_categories:
                 app = current_app
@@ -614,10 +662,10 @@ while True:
                         f'cat "{DIRECTORY}/apps/' + app + '/credits" 2>/dev/null').read().rstrip('\n')
                     if credits_text != '':
                         sg.Window('Credits', [[sg.T(credits_text)], [
-                                sg.OK(s=10)]]).read(close=True)
+                            sg.OK(s=10)]]).read(close=True)
                     else:
                         sg.Window('Credits', [
-                                [sg.T('No credit found for ' + app + '.\n')], [sg.OK(s=10)]]).read(close=True)
+                            [sg.T('No credit found for ' + app + '.\n')], [sg.OK(s=10)]]).read(close=True)
                 else:
                     pass  # category is selected, no credits available, skip
             else:
@@ -631,6 +679,7 @@ while True:
                             if os.path.exists(f'{DIRECTORY}/apps/' + app + '/' + file):
                                 os.popen(
                                     f'{DIRECTORY}/api text_editor "{DIRECTORY}/apps/' + app + '/' + file + '"')
+                                time.sleep(0.1)
                     else:
                         sg.Window('No scripts found', [[sg.T(
                             app + ' is a package app.\n')], [sg.OK(s=10)]], size=(500, 100)).read(close=True)
