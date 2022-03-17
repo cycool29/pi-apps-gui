@@ -400,17 +400,17 @@ search_column = [
     ],
     [
         sg.pin(sg.Button(key='-MENU BACK-',
-               image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False)),
+               image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False, tooltip='Return to category list')),
         sg.Column([[sg.Button(key='-UPDATES-',
-               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False)]], element_justification='r', expand_x=True),
+               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False, tooltip='View updatable apps')]], element_justification='r', expand_x=True),
     ],
 ]
 
 app_info_column = [
     [sg.Image(key='-APP ICON-', filename=f'{DIRECTORY}/icons/proglogo.png'),
      sg.Text("", key="-APP NAME-", font=default_font_name + " 14"), sg.Button(key="-GITHUB BUTTON-",
-                                                                              image_filename=f'{DIRECTORY}/icons/github.png', button_text="             "),  sg.Button(key="-WEBSITE BUTTON-",
-                                                                                                                                                                       image_filename=f'{DIRECTORY}/icons/website.png', button_text="             ")],
+                                                                              image_filename=f'{DIRECTORY}/icons/github.png', button_text="             ", tooltip='View Pi-Apps GitHub page'),  
+     sg.Button(key="-WEBSITE BUTTON-", image_filename=f'{DIRECTORY}/icons/website.png', button_text="             ", tooltip='View Pi-Apps website')],
     [sg.Text("""The most popular app store for Raspberry Pi computers.""",
              key="-STATUS-", font=default_font)],
     [sg.Text(key="-WEBSITE_1-", font=default_font), sg.Text(key="-WEBSITE_2-",
@@ -480,6 +480,8 @@ window.TKroot.focus_force()
 
 if os.popen(f'if {DIRECTORY}/updater get-status 2>/dev/null; then echo 0; else echo 1; fi').read().rstrip('\n') == '0':
     window['-UPDATES-'].update(visible=True)
+else:
+    window['-UPDATES-'].update(visible=False)
     
 
 # Run the Event Loop
@@ -716,6 +718,10 @@ while True:
         window.Hide()
         os.popen(f'"{DIRECTORY}/updater" gui fast').read()
         window.UnHide()
+        if os.popen(f'if {DIRECTORY}/updater get-status 2>/dev/null; then echo 0; else echo 1; fi').read().rstrip('\n') == '0':
+            window['-UPDATES-'].update(visible=True)
+        else:
+            window['-UPDATES-'].update(visible=False)
         window.TKroot.focus_force()
 
 window.close()
