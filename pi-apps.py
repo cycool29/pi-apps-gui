@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # Import modules
-from gi.repository import Gtk
 import time
 import sys
 import random
@@ -12,6 +11,7 @@ import os.path
 import PySimpleGUI as sg
 import gi
 gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 
 # Define functions
@@ -44,6 +44,8 @@ def install_app(app):
     fi' 'Installing ''' + app + '''' ''').read()
     debug('Done installing ' + app + '.')
     window.UnHide()
+    window.TKroot.focus_force()
+
 
 
 def uninstall_app(app):
@@ -67,6 +69,7 @@ def uninstall_app(app):
     fi' 'Unnstalling ''' + app + '''' ''').read()
     debug('Done uninstalling ' + app + '.')
     window.UnHide()
+    window.TKroot.focus_force()
 
 
 def back_to_category_list():
@@ -85,7 +88,6 @@ def back_to_category_list():
 
     window['-APP LIST-'].update(app_list_data)
     window['-MENU BACK-'].update(visible=False)
-    window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size((50, 0))
 
     window['-TOOLTIP-'].update('')
     window['-SEARCH BAR-'].update('')
@@ -131,7 +133,6 @@ def show_category(category):
     window['-APP LIST-'].update(app_list_data)
     current_app = ''
     window['-MENU BACK-'].update(visible=True)
-    window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size((43, 0))
     window['-SEARCH BAR-'].update('')
     window['-TOOLTIP-'].update('')
     current_category = category
@@ -313,6 +314,8 @@ debug('DIRECTORY: ' + DIRECTORY)
 
 # Settings
 
+os.spawnl(os.P_NOWAIT, 'test',  f'"{DIRECTORY}/updater"', 'set-status', '&>/dev/null')
+
 try:
     with open(f'{DIRECTORY}/data/settings/Shuffle App list', 'r') as f:
         if f.read().replace('\n', '') == 'Yes':
@@ -368,15 +371,6 @@ for category in sorted(app_categories):
     i += 1
 current_category = 'Category List'
 
-# # button list types
-# if show_edit_button is True:
-#     installed_button_list = ['uninstall', 'credits', 'scripts', 'edit']
-#     uninstalled_button_list = ['uninstall', 'credits', 'scripts', 'edit']
-#     corrupted_button_list = ['install', 'uninstall', 'errors', 'credits', 'scripts', 'edit']
-# else:
-#     installed_button_list = ['uninstall', 'credits', 'scripts']
-#     uninstalled_button_list = ['uninstall', 'credits', 'scripts']
-#     corrupted_button_list = ['install', 'uninstall', 'errors', 'credits', 'scripts']
 
 
 # Create column layouts
@@ -402,15 +396,13 @@ search_column = [
     ],
     [
         sg.Tree(app_list_data, headings='', num_rows=12,
-                select_mode='browse', enable_events=True, key='-APP LIST-', font=default_font, col0_width=40, row_height=30, auto_size_columns=False),
+                select_mode='browse', enable_events=True, key='-APP LIST-', font=default_font, col0_width=45, row_height=30, auto_size_columns=False),
     ],
     [
         sg.pin(sg.Button(key='-MENU BACK-',
                image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False)),
-        sg.pin(sg.Text('', size=(50, 0),
-               key='-SEPARATOR BETWEEN MENU BACK AND UPDATES-')),
-        sg.pin(sg.Button(key='-UPDATE-',
-               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ',)),
+        sg.Column([[sg.Button(key='-UPDATES-',
+               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False)]], element_justification='r', expand_x=True),
     ],
 ]
 
@@ -484,8 +476,11 @@ window.bind('<Control-u>', '-UNINSTALL-')
 window.bind('<Control-s>', '-SCRIPTS-')
 window.bind('<Control-c>', '-CREDITS-')
 window.bind('<Alt-s>', '-GO TO SEARCH-')
-window['-SEARCH BAR-'].set_focus()
+window.TKroot.focus_force()
 
+if os.popen(f'if {DIRECTORY}/updater get-status 2>/dev/null; then echo 0; else echo 1; fi').read().rstrip('\n') == '0':
+    window['-UPDATES-'].update(visible=True)
+    
 
 # Run the Event Loop
 while True:
@@ -538,9 +533,6 @@ while True:
                 window['-APP LIST-'].update(app_list_data)
                 # Make back button visible so users can return to category list
                 window['-MENU BACK-'].update(visible=True)
-                window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size(
-                    (43, 0))
-
                 ids = window['-APP LIST-'].Widget.identify_row(1)
                 key = window['-APP LIST-'].IdToKey[ids]
                 window['-APP LIST-'].Widget.selection_set(ids)
@@ -609,7 +601,6 @@ while True:
 
     elif event == '-MENU BACK-':  # When clicked on back button, return to category list
         back_to_category_list()
-        window['-SEPARATOR BETWEEN MENU BACK AND UPDATES-'].set_size((50, 0))
 
     elif event == '-APP LIST-+MOTION+':  # When mouse is in app list, detect what entry and show tooltip
         e = window['-APP LIST-'].user_bind_event
@@ -697,7 +688,7 @@ while True:
                 os.popen(f'{DIRECTORY}/api text_editor ' + error_file)
 
     elif event == '-GO TO SEARCH-':  # When alt+s is pressed, focus to search bar
-        window['-SEARCH BAR-'].set_focus()
+        window.TKroot.focus_force()
 
     elif event == '-GITHUB BUTTON-':
         webbrowser.open('https://github.com/Botspot/pi-apps')
@@ -721,5 +712,10 @@ while True:
         if current_app != '':
             load_app_info(current_app)
 
+    elif event == '-UPDATES-':
+        window.Hide()
+        os.popen(f'"{DIRECTORY}/updater" gui fast').read()
+        window.UnHide()
+        window.TKroot.focus_force()
 
 window.close()
