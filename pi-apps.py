@@ -167,8 +167,7 @@ def load_app_info(app):
                                 app + '/description"').read()
     debug(app + "'s description: \n" + description_text)
 
-    users_count = int(
-        os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))
+    users_count = int(''.join(filter(str.isdigit, os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))))
     debug(app + "'s users count: " + str(users_count))
 
     window["-APP NAME-"].update(app,
@@ -314,7 +313,7 @@ debug('DIRECTORY: ' + DIRECTORY)
 
 # Settings
 
-os.spawnl(os.P_NOWAIT, 'test',  f'"{DIRECTORY}/updater"', 'set-status', '&>/dev/null')
+os.spawnl(os.P_NOWAIT, f'"{DIRECTORY}/updater"', 'set-status', '&>/dev/null')
 
 try:
     with open(f'{DIRECTORY}/data/settings/Shuffle App list', 'r') as f:
