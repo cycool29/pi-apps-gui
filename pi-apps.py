@@ -66,7 +66,7 @@ def uninstall_app(app):
     else
       echo -e "\nClose this window to exit."
       read enter 
-    fi' 'Unnstalling ''' + app + '''' ''').read()
+    fi' 'Uninstalling ''' + app + '''' ''').read()
     debug('Done uninstalling ' + app + '.')
     window.UnHide()
     window.TKroot.focus_force()
