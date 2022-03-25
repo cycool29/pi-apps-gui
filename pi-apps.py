@@ -22,6 +22,63 @@ def debug(message):
     else:
         pass
 
+def do_operation(operation):
+    print(current_app)
+    if operation == 'install':
+        if current_app != '' and current_app not in app_categories:
+            app = current_app
+            install_app(app)
+            load_app_info(app)
+        else:
+            pass
+    elif operation == 'uninstall':
+        if current_app != '' and current_app not in app_categories:
+            app = current_app
+            uninstall_app(app)
+            load_app_info(app)
+        else:
+            pass
+    elif operation == 'credits':
+        if current_app != '':
+            if current_app not in app_categories:
+                app = current_app
+                credits_text = os.popen(
+                    f'cat "{DIRECTORY}/apps/' + app + '/credits" 2>/dev/null').read().rstrip('\n')
+                if credits_text != '':
+                    sg.Window('Credits', [[sg.T(credits_text)], [
+                        sg.OK(s=10)]]).read(close=True)
+                else:
+                    sg.Window('Credits', [
+                        [sg.T('No credit found for ' + app + '.\n')], [sg.OK(s=10)]]).read(close=True)
+            else:
+                pass  # category is selected, no credits available, skip
+        else:
+            pass
+    elif operation == 'scripts':
+        if current_app != '':
+            if current_app not in app_categories:
+                app = current_app
+                if os.popen(f'{DIRECTORY}/api app_type ' + app).read().strip('\n') != 'package':
+                    for file in ['install', 'install-32', 'install-64', 'uninstall']:
+                        if os.path.exists(f'{DIRECTORY}/apps/' + app + '/' + file):
+                            os.popen(
+                                f'{DIRECTORY}/api text_editor "{DIRECTORY}/apps/' + app + '/' + file + '"')
+                            time.sleep(0.1)
+                else:
+                    sg.Window('No scripts found', [[sg.T(
+                        app + ' is a package app.\n')], [sg.OK(s=10)]], size=(500, 100)).read(close=True)
+
+            else:
+                pass  # category is selected
+        else:
+            pass
+    elif operation == 'errors':
+        if current_app != '':
+            app = current_app
+            print(app)
+            error_file = os.popen(
+                f'ls "{DIRECTORY}/logs"/* -t | grep "fail-' + app + '" | head -n1').read()
+            os.popen(f'{DIRECTORY}/api text_editor ' + error_file)
 
 def install_app(app):
     window.Hide()
@@ -475,7 +532,7 @@ window.bind('<Control-u>', '-UNINSTALL-')
 window.bind('<Control-s>', '-SCRIPTS-')
 window.bind('<Control-c>', '-CREDITS-')
 window.bind('<Alt-s>', '-GO TO SEARCH-')
-window.TKroot.focus_force()
+window['-SEARCH BAR-'].Widget.focus_set()
 
 if os.popen(f'if {DIRECTORY}/updater get-status 2>/dev/null; then echo 0; else echo 1; fi').read().rstrip('\n') == '0':
     window['-UPDATES-'].update(visible=True)
@@ -579,17 +636,17 @@ while True:
         window['-DESCRIPTION-'].Widget.unbind("<1>")
         window['-DESCRIPTION-'].update(disabled=False)
 
-    elif event == '-INSTALL OR UNINSTALL-':
-        if current_app != '':
-            app = current_app
-            if status_text == 'uninstalled':
-                install_app(app)
-            else:
-                uninstall_app(app)
+    elif event == '-INSTALL-':
+            install_app(current_app)
 
-            load_app_info(app)
-        else:
-            pass
+    elif event == '-UNINSTALL-':
+            uninstall_app(current_app)
+            
+    elif event == '-SCRIPTS-':
+            do_operation('scripts')
+    
+    elif event == '-CREDITS-':
+            do_operation('credits')
 
     elif event == '-WEBSITE_2-':  # When clicked on website URL, open in browser
         webbrowser.open(window["-WEBSITE_2-"].get())
@@ -632,64 +689,10 @@ while True:
         operation = button_list[int(
             ''.join([n for n in event if n.isdigit()])) - 1]
 
-        if operation == 'install':
-            if current_app != '' and current_app not in app_categories:
-                app = current_app
-                install_app(app)
-                load_app_info(app)
-            else:
-                pass
-        elif operation == 'uninstall':
-            if current_app != '' and current_app not in app_categories:
-                app = current_app
-                uninstall_app(app)
-                load_app_info(app)
-            else:
-                pass
-        elif operation == 'credits':
-            if current_app != '':
-                if current_app not in app_categories:
-                    app = current_app
-                    credits_text = os.popen(
-                        f'cat "{DIRECTORY}/apps/' + app + '/credits" 2>/dev/null').read().rstrip('\n')
-                    if credits_text != '':
-                        sg.Window('Credits', [[sg.T(credits_text)], [
-                            sg.OK(s=10)]]).read(close=True)
-                    else:
-                        sg.Window('Credits', [
-                            [sg.T('No credit found for ' + app + '.\n')], [sg.OK(s=10)]]).read(close=True)
-                else:
-                    pass  # category is selected, no credits available, skip
-            else:
-                pass
-        elif operation == 'scripts':
-            if current_app != '':
-                if current_app not in app_categories:
-                    app = current_app
-                    if os.popen(f'{DIRECTORY}/api app_type ' + app).read().strip('\n') != 'package':
-                        for file in ['install', 'install-32', 'install-64', 'uninstall']:
-                            if os.path.exists(f'{DIRECTORY}/apps/' + app + '/' + file):
-                                os.popen(
-                                    f'{DIRECTORY}/api text_editor "{DIRECTORY}/apps/' + app + '/' + file + '"')
-                                time.sleep(0.1)
-                    else:
-                        sg.Window('No scripts found', [[sg.T(
-                            app + ' is a package app.\n')], [sg.OK(s=10)]], size=(500, 100)).read(close=True)
-
-                else:
-                    pass  # category is selected
-            else:
-                pass
-        elif operation == 'errors':
-            if current_app != '':
-                app = current_app
-                print(app)
-                error_file = os.popen(
-                    f'ls "{DIRECTORY}/logs"/* -t | grep "fail-' + app + '" | head -n1').read()
-                os.popen(f'{DIRECTORY}/api text_editor ' + error_file)
+        do_operation(operation)
 
     elif event == '-GO TO SEARCH-':  # When alt+s is pressed, focus to search bar
-        window.TKroot.focus_force()
+        window['-SEARCH BAR-'].Widget.focus_set()
 
     elif event == '-GITHUB BUTTON-':
         webbrowser.open('https://github.com/Botspot/pi-apps')
