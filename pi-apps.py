@@ -11,7 +11,7 @@ import os.path
 import PySimpleGUI as sg
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk #nopep8
 
 
 # Define functions
@@ -21,6 +21,7 @@ def debug(message):
         print(message)
     else:
         pass
+
 
 def do_operation(operation):
     print(current_app)
@@ -80,6 +81,7 @@ def do_operation(operation):
                 f'ls "{DIRECTORY}/logs"/* -t | grep "fail-' + app + '" | head -n1').read()
             os.popen(f'{DIRECTORY}/api text_editor ' + error_file)
 
+
 def install_app(app):
     window.Hide()
     debug('Installing ' + app + '.')
@@ -102,7 +104,6 @@ def install_app(app):
     debug('Done installing ' + app + '.')
     window.UnHide()
     window.TKroot.focus_force()
-
 
 
 def uninstall_app(app):
@@ -224,7 +225,8 @@ def load_app_info(app):
                                 app + '/description"').read()
     debug(app + "'s description: \n" + description_text)
 
-    users_count = int(''.join(filter(str.isdigit, os.popen(f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))))
+    users_count = int(''.join(filter(str.isdigit, os.popen(
+        f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))))
     debug(app + "'s users count: " + str(users_count))
 
     window["-APP NAME-"].update(app,
@@ -428,7 +430,6 @@ for category in sorted(app_categories):
 current_category = 'Category List'
 
 
-
 # Create column layouts
 search_column = [
     [
@@ -458,14 +459,14 @@ search_column = [
         sg.pin(sg.Button(key='-MENU BACK-',
                image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False, tooltip='Return to category list')),
         sg.Column([[sg.Button(key='-UPDATES-',
-               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False, tooltip='View updatable apps')]], element_justification='r', expand_x=True),
+                              image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False, tooltip='View updatable apps')]], element_justification='r', expand_x=True),
     ],
 ]
 
 app_info_column = [
     [sg.Image(key='-APP ICON-', filename=f'{DIRECTORY}/icons/proglogo.png'),
      sg.Text("", key="-APP NAME-", font=default_font_name + " 14"), sg.Button(key="-GITHUB BUTTON-",
-                                                                              image_filename=f'{DIRECTORY}/icons/github.png', button_text="             ", tooltip='View Pi-Apps GitHub page'),  
+                                                                              image_filename=f'{DIRECTORY}/icons/github.png', button_text="             ", tooltip='View Pi-Apps GitHub page'),
      sg.Button(key="-WEBSITE BUTTON-", image_filename=f'{DIRECTORY}/icons/website.png', button_text="             ", tooltip='View Pi-Apps website')],
     [sg.Text("""The most popular app store for Raspberry Pi computers.""",
              key="-STATUS-", font=default_font)],
@@ -538,7 +539,7 @@ if os.popen(f'if {DIRECTORY}/updater get-status 2>/dev/null; then echo 0; else e
     window['-UPDATES-'].update(visible=True)
 else:
     window['-UPDATES-'].update(visible=False)
-    
+
 
 # Run the Event Loop
 while True:
@@ -637,16 +638,16 @@ while True:
         window['-DESCRIPTION-'].update(disabled=False)
 
     elif event == '-INSTALL-':
-            install_app(current_app)
+        install_app(current_app)
 
     elif event == '-UNINSTALL-':
-            uninstall_app(current_app)
-            
+        uninstall_app(current_app)
+
     elif event == '-SCRIPTS-':
-            do_operation('scripts')
-    
+        do_operation('scripts')
+
     elif event == '-CREDITS-':
-            do_operation('credits')
+        do_operation('credits')
 
     elif event == '-WEBSITE_2-':  # When clicked on website URL, open in browser
         webbrowser.open(window["-WEBSITE_2-"].get())
