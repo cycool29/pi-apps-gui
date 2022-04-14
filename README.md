@@ -5,6 +5,7 @@ A Python version pi-apps GUI. Working in progress.
 
 To test it, run the following commands:
 ```bash
+pip3 install PySimpleGUI
 cd /tmp
 rm -rf pi-apps
 git clone https://github.com/Botspot/pi-apps
