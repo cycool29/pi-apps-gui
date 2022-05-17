@@ -225,8 +225,12 @@ def load_app_info(app):
                                 app + '/description"').read()
     debug(app + "'s description: \n" + description_text)
 
-    users_count = int(''.join(filter(str.isdigit, os.popen(
-        f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))))
+    try:
+        users_count = int(''.join(filter(str.isdigit, os.popen(
+            f"{DIRECTORY}/api usercount '{app}' 2>/dev/null").read().rstrip('\n'))))
+    except ValueError:
+        users_count = ''
+
     debug(app + "'s users count: " + str(users_count))
 
     window["-APP NAME-"].update(app,
@@ -250,7 +254,10 @@ def load_app_info(app):
         elif users_count > 1:
             window["-USERS_2-"].update('users')
         else:
-            window["-USERS-"].update("user")
+            window["-USERS_2-"].update("user")
+    else:
+        window["-USERS_1-"].update(' ')
+        window["-USERS_2-"].update(' ')
 
     window["-GITHUB BUTTON-"].update(visible=False)
     window["-WEBSITE BUTTON-"].update(visible=False)
@@ -261,7 +268,7 @@ def load_app_info(app):
                '-BUTTON 4-', '-BUTTON 5-', '-BUTTON 6-']
 
     for button in buttons:
-        window[button].update(' ', visible=False, image_filename='')
+        window[button].update('', visible=False, image_filename='')
 
     button_list = []
     i = []
@@ -311,36 +318,46 @@ def load_app_info(app):
     for button in i:
         if button == 'install':
             window[buttons[n]].update(
-                '      ', visible=True, image_filename=f'{DIRECTORY}/icons/install.png', )
+                visible=True, image_filename=f'{DIRECTORY}/icons/install.png', text='Install')
             window[buttons[n]].set_tooltip('Install ' + app)
-
+            window[buttons[n]].Widget.configure(
+                compound='left', width=0, height=0)
             button_list.append('install')
         elif button == 'uninstall':
             window[buttons[n]].update(
-                '  ', visible=True, image_filename=f'{DIRECTORY}/icons/uninstall.png', )
+                visible=True, image_filename=f'{DIRECTORY}/icons/uninstall.png', text='Uninstall')
             button_list.append('uninstall')
+            window[buttons[n]].Widget.configure(
+                compound='left', width=0, height=0)
             window[buttons[n]].set_tooltip('Uninstall ' + app)
         elif button == 'credits':
             window[buttons[n]].update("Credits", visible=True)
             window[buttons[n]].set_tooltip(
                 'See who made the app and who put it on Pi-Apps')
+            # window[buttons[n]].Widget.configure(compound='none')
             button_list.append('credits')
         elif button == 'scripts':
             window[buttons[n]].update(
-                '  ', visible=True, image_filename=f'{DIRECTORY}/icons/shellscript.png',)
+                visible=True, image_filename=f'{DIRECTORY}/icons/shellscript.png', text='Scripts')
             window[buttons[n]].set_tooltip(
                 "Feel free to see how an app is installed or uninstalled!\nPerfect for learning or troubleshooting.")
+            window[buttons[n]].Widget.configure(
+                compound='left', width=0, height=0)
             button_list.append('scripts')
         elif button == 'edit':
             window[buttons[n]].update(
-                visible=True, image_filename=f'{DIRECTORY}/icons/edit.png', )
+                visible=True, image_filename=f'{DIRECTORY}/icons/edit.png', text='Edit')
+            window[buttons[n]].Widget.configure(
+                compound='left', width=0, height=0)
             window[buttons[n]].set_size((0, 24))
             print(type(window))
             button_list.append('edit')
             window[buttons[n]].set_tooltip('Make changes to the app')
         elif button == 'errors':
             window[buttons[n]].update(
-                visible=True, image_filename=f'{DIRECTORY}/icons/log-file.png')
+                visible=True, image_filename=f'{DIRECTORY}/icons/log-file.png', text='Errors')
+            window[buttons[n]].Widget.configure(
+                compound='left', width=0, height=0)
             window[buttons[n]].set_tooltip('')
             button_list.append('errors')
 
@@ -356,6 +373,7 @@ def load_app_info(app):
 
 if '--debug' in sys.argv:
     enable_debug = True
+    print('PySimpleGUI version: ' + str(sg.version))
 else:
     enable_debug = False
 
@@ -442,7 +460,8 @@ sg.theme('GreenTan')
 # Create column layouts
 search_column = [
     [
-        sg.Image(filename=f'{DIRECTORY}/icons/proglogo.png', size=(400, 120))
+        sg.Image(filename=f'{DIRECTORY}/icons/proglogo.png', size=(400, 120)
+                 ), sg.Button(key='-SETTINGS-', button_text='Settings'),
     ],
     [
         sg.Text('')
@@ -458,7 +477,8 @@ search_column = [
         sg.Text('')
     ],
     [
-        sg.Column([[sg.Text('', key='-TOOLTIP-', size=(65, 6))]], pad=(0, 0))
+        sg.Column([[sg.Text('', key='-TOOLTIP-', size=(65, 5),
+                  font=default_font_name + " 10")]], pad=(0, 0))
     ],
     [
         sg.Tree(app_list_data, headings='', num_rows=15,
@@ -522,7 +542,10 @@ layout = [
 
 # Create window
 window = sg.Window("Pi-Apps", layout,
-                   icon=f'{DIRECTORY}/icons/logo.png', finalize=True, size=(1250, 900))
+                   icon=f'{DIRECTORY}/icons/logo.png', resizable=True).Finalize()
+
+
+# window.TKroot.minsize(str(window.TKroot.winfo_screenwidth()), str(window.TKroot.winfo_screenheight()), )
 
 
 # https://stackoverflow.com/questions/38871450/how-can-i-get-the-default-colors-in-gtk
