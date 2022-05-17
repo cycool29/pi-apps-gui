@@ -16,3 +16,14 @@ wget https://github.com/cycool29/pi-apps-gui/raw/master/pi-apps.py -O gui
 chmod +x ./gui
 ./gui
 ```
+
+To replace it with Pi-Apps default GUI:
+```bash
+pip3 install PySimpleGUI
+cd ~/pi-apps
+rm -f gui 
+wget https://github.com/cycool29/pi-apps-gui/raw/master/github.png -O icons/github.png
+wget https://github.com/cycool29/pi-apps-gui/raw/master/website.png -O icons/website.png
+wget https://github.com/cycool29/pi-apps-gui/raw/master/pi-apps.py -O gui
+chmod +x ./gui
+```
