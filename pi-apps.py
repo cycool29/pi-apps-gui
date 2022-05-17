@@ -11,7 +11,7 @@ import os.path
 import PySimpleGUI as sg
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk #nopep8
+from gi.repository import Gtk  # nopep8
 
 
 # Define functions
@@ -172,7 +172,7 @@ def show_category(category):
     else:  # Other categories
         debug('\nShowing ' + category + ' category.')
         category_apps = os.popen(
-            f'cat {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides 2>/dev/null | grep {category} | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
+            f'cat {DIRECTORY}/etc/categories  {DIRECTORY}/data/category-overrides 2>/dev/null | grep "{category}" | sed "s/|.*//g" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n')
 
     i = 0
     app_list_data = sg.TreeData()
@@ -319,7 +319,7 @@ def load_app_info(app):
             window[buttons[n]].update(
                 '  ', visible=True, image_filename=f'{DIRECTORY}/icons/uninstall.png', )
             button_list.append('uninstall')
-            window[buttons[n]].set_tooltip('Uninstall' + app)
+            window[buttons[n]].set_tooltip('Uninstall ' + app)
         elif button == 'credits':
             window[buttons[n]].update("Credits", visible=True)
             window[buttons[n]].set_tooltip(
@@ -405,17 +405,24 @@ debug('Font: ' + default_font)
 old_list_index = (None, None)
 current_app = ''
 
+app_categories = os.popen(
+    f'{DIRECTORY}/api app_categories | sed "s+.*/++g"').read().strip('\n')
+
 app_categories = [
     'All Apps',
-    'Imported',
-    'Installed',
-    'Tools',
-    'Games',
-    'Internet',
-    'Editors',
-    'Multimedia',
-    'Browsers',
     'Appearance',
+    'Creative Arts',
+    'Engineering',
+    'Games',
+    'Installed',
+    'Internet',
+    'Multimedia',
+    'Office',
+    'Packages',
+    'Programming',
+    'System Management',
+    'Terminals',
+    'Tools',
 ]
 debug('Categories: ' + str(app_categories))
 
@@ -428,6 +435,8 @@ for category in sorted(app_categories):
     app_list_data.insert('', i, ' ' + str(category), [], icon=icon)
     i += 1
 current_category = 'Category List'
+
+sg.theme('GreenTan')
 
 
 # Create column layouts
@@ -452,7 +461,7 @@ search_column = [
         sg.Column([[sg.Text('', key='-TOOLTIP-', size=(65, 6))]], pad=(0, 0))
     ],
     [
-        sg.Tree(app_list_data, headings='', num_rows=12,
+        sg.Tree(app_list_data, headings='', num_rows=15,
                 select_mode='browse', enable_events=True, key='-APP LIST-', font=default_font, col0_width=45, row_height=30, auto_size_columns=False),
     ],
     [
@@ -473,7 +482,8 @@ app_info_column = [
     [sg.Text(key="-WEBSITE_1-", font=default_font), sg.Text(key="-WEBSITE_2-",
                                                             click_submits=True, text_color='blue', font=default_font + ' underline')],
     [sg.Text(key="-USERS_1-", font=default_font + ' bold', pad=(0, 0)),
-     sg.Text(key="-USERS_2-", font=default_font, pad=(0, 0))],
+     sg.Text(key="-USERS_2-", font=default_font, pad=(0, 0)),
+     sg.Text(key="-USERS_3-", font=default_font, pad=(0, 0), text='\n')],
 
     [sg.Multiline("""Let's be honest: Linux is harder to master than Windows. 
 Sometimes it's not user-friendly, and following an outdated tutorial may break your Raspberry Pi's operating system.
@@ -512,7 +522,7 @@ layout = [
 
 # Create window
 window = sg.Window("Pi-Apps", layout,
-                   icon=f'{DIRECTORY}/icons/logo.png', finalize=True, size=(1250, 800))
+                   icon=f'{DIRECTORY}/icons/logo.png', finalize=True, size=(1250, 900))
 
 
 # https://stackoverflow.com/questions/38871450/how-can-i-get-the-default-colors-in-gtk
