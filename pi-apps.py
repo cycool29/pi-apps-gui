@@ -460,8 +460,8 @@ sg.theme('GreenTan')
 # Create column layouts
 search_column = [
     [
-        sg.Image(filename=f'{DIRECTORY}/icons/proglogo.png', size=(400, 120)
-                 ), sg.Button(key='-SETTINGS-', button_text='Settings'),
+        sg.Image(filename=f'{DIRECTORY}/icons/proglogo.png', size=(400, 120), expand_x=True
+                 ),
     ],
     [
         sg.Text('')
@@ -471,7 +471,9 @@ search_column = [
         sg.In(size=(25, 1), enable_events=True,
               font=default_font, key='-SEARCH BAR-'),
         sg.Button("Search", font=default_font,
-                  key='-SEARCH-', bind_return_key=True),
+                  key='-SEARCH-', bind_return_key=True, image_filename=f'{DIRECTORY}/icons/search.png'),
+        sg.Button(key='-SETTINGS-', button_text=' ',
+                  image_filename=f'{DIRECTORY}/icons/settings.png', image_subsample=14),
     ],
     [
         sg.Text('')
@@ -482,7 +484,7 @@ search_column = [
     ],
     [
         sg.Tree(app_list_data, headings='', num_rows=15,
-                select_mode='browse', enable_events=True, key='-APP LIST-', font=default_font, col0_width=45, row_height=30, auto_size_columns=False),
+                select_mode='browse', enable_events=True, key='-APP LIST-', font=default_font, col0_width=53, row_height=30, auto_size_columns=False),
     ],
     [
         sg.pin(sg.Button(key='-MENU BACK-',
@@ -542,15 +544,11 @@ layout = [
 
 # Create window
 window = sg.Window("Pi-Apps", layout,
-                   icon=f'{DIRECTORY}/icons/logo.png', resizable=True).Finalize()
+                   icon=f'{DIRECTORY}/icons/logo.png', resizable=False, size=(1350, 850)).Finalize()
 
 
-# window.TKroot.minsize(str(window.TKroot.winfo_screenwidth()), str(window.TKroot.winfo_screenheight()), )
-
-
-# https://stackoverflow.com/questions/38871450/how-can-i-get-the-default-colors-in-gtk
-
-# Bindings
+# Configure window
+window['-SEARCH-'].Widget.configure(compound='left', width=0, height=0)
 window['-APP LIST-'].Widget.configure(show='tree')
 window.Element('-DESCRIPTION-').bind("<FocusIn>", '+FOCUS_IN+')
 window.Element('-DESCRIPTION-').bind("<FocusOut>", '+FOCUS_OUT+')
@@ -760,4 +758,41 @@ while True:
             window['-UPDATES-'].update(visible=False)
         window.TKroot.focus_force()
 
+    elif event == '-SETTINGS-':
+        window.Hide()
+        os.popen(f'"{DIRECTORY}/settings"').read()
+        try:
+            with open(f'{DIRECTORY}/data/settings/Shuffle App list', 'r') as f:
+                if f.read().replace('\n', '') == 'Yes':
+                    shuffle_app_list = True
+                else:
+                    shuffle_app_list = False
+        except:
+            shuffle_app_list = False
+
+        debug('Shuffle app list: ' + str(shuffle_app_list))
+
+        try:
+            with open(f'{DIRECTORY}/data/settings/Show Edit button', 'r') as f:
+                if f.read().replace('\n', '') == 'Yes':
+                    show_edit_button = True
+                else:
+                    show_edit_button = False
+        except:
+            show_edit_button = False
+
+        debug('Show edit button: ' + str(show_edit_button))
+
+        window.un_hide()
+
+        if current_app != '':
+            load_app_info(current_app)
+
+        if current_category != 'Category List':
+            show_category(current_category)
+        else:
+            back_to_category_list()
+
+        window.refresh()
+        
 window.close()
