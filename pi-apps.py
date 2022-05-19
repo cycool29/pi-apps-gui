@@ -471,9 +471,9 @@ search_column = [
         sg.In(size=(25, 1), enable_events=True,
               font=default_font, key='-SEARCH BAR-'),
         sg.Button("Search", font=default_font,
-                  key='-SEARCH-', bind_return_key=True, image_filename=f'{DIRECTORY}/icons/search.png'),
+                  key='-SEARCH-', bind_return_key=True, image_filename=f'{DIRECTORY}/icons/search.png', tooltip='Search'),
         sg.Button(key='-SETTINGS-', button_text=' ',
-                  image_filename=f'{DIRECTORY}/icons/settings.png', image_subsample=14),
+                  image_filename=f'{DIRECTORY}/icons/settings.png', image_subsample=14, tooltip='Settings'),
     ],
     [
         sg.Text('')
@@ -708,7 +708,7 @@ while True:
             app = app_list_data.tree_dict[key].text[1:]
             if app not in app_categories:
                 with open(f'{DIRECTORY}/apps/' + app + '/description') as f:
-                    first_line = textwrap.fill(f.readline(), 70)
+                    first_line = textwrap.fill(f.readline(), 75)
                 window['-TOOLTIP-'].update(first_line)
                 # window['-APP LIST-'].set_tooltip(tooltip_text=first_line)
 
