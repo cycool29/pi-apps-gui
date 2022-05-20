@@ -80,6 +80,21 @@ def do_operation(operation):
             error_file = os.popen(
                 f'ls "{DIRECTORY}/logs"/* -t | grep "fail-' + app + '" | head -n1').read()
             os.popen(f'{DIRECTORY}/api text_editor ' + error_file)
+    elif operation == 'edit':
+        if current_app != '':
+            app = current_app
+            print(app)
+            window.Hide()
+            os.popen(f'{DIRECTORY}/createapp "{app}"').read()
+            window.UnHide()
+            load_app_info(current_app)
+            if current_category != 'Category List':
+                show_category(current_category)
+            else:
+                back_to_category_list()
+
+            window.refresh()
+            window.TKroot.focus_force()
 
 
 def install_app(app):
@@ -189,7 +204,7 @@ def show_category(category):
             i += 1
 
     window['-APP LIST-'].update(app_list_data)
-    current_app = ''
+    # current_app = ''
     window['-MENU BACK-'].update(visible=True)
     window['-SEARCH BAR-'].update('')
     window['-TOOLTIP-'].update('')
@@ -563,6 +578,7 @@ window.bind('<Control-i>', '-INSTALL-')
 window.bind('<Control-u>', '-UNINSTALL-')
 window.bind('<Control-s>', '-SCRIPTS-')
 window.bind('<Control-c>', '-CREDITS-')
+window.bind('<Control-e>', '-EDIT-')
 window.bind('<Alt-s>', '-GO TO SEARCH-')
 window['-SEARCH BAR-'].Widget.focus_set()
 
@@ -642,8 +658,18 @@ while True:
     elif event == "-APP LIST-":  # An app was chosen from the list
         # Get current selected item
         if window.Element('-APP LIST-').SelectedRows != []:
-            current_app = app_list[window.Element(
-                '-APP LIST-').SelectedRows[0]]
+            if app_list[window.Element('-APP LIST-').SelectedRows[0]] == '':
+                pass
+            # If the item is a category, enter the category
+            elif app_list[window.Element('-APP LIST-').SelectedRows[0]] in app_categories:
+                current_category = app_list[window.Element(
+                    '-APP LIST-').SelectedRows[0]]
+                show_category(current_category)
+            elif app_list[window.Element('-APP LIST-').SelectedRows[0]] in os.popen(
+                    f'{DIRECTORY}/api list_apps cpu_installable | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps visible)" | {DIRECTORY}/api list_intersect "$({DIRECTORY}/api list_apps cpu_installable)"').read().split('\n'):
+                # try:
+                app = app_list[window.Element('-APP LIST-').SelectedRows[0]]
+                load_app_info(app)
 
         if current_app == '':
             pass
@@ -679,6 +705,9 @@ while True:
 
     elif event == '-CREDITS-':
         do_operation('credits')
+
+    elif event == '-EDIT-':
+        do_operation('edit')
 
     elif event == '-WEBSITE_2-':  # When clicked on website URL, open in browser
         webbrowser.open(window["-WEBSITE_2-"].get())
@@ -794,5 +823,6 @@ while True:
             back_to_category_list()
 
         window.refresh()
-        
+        window.TKroot.focus_force()
+
 window.close()
