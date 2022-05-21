@@ -7,6 +7,7 @@ A Python version of [Pi-Apps](https://github.com/Botspot/pi-apps) GUI built with
 
 To replace it with Pi-Apps default GUI:
 ```bash
+sudo apt install python3-tk
 pip3 install PySimpleGUI
 cd ~/pi-apps
 rm -f gui 
