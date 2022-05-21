@@ -45,7 +45,7 @@ chmod +x ./gui
 - Write another settings for togggling features (theme, tray icon, etc...)
 - Announcement text label
 - Fix app info tab change its size when changing category
-
+- Support multi-installing
 
 ## Suggestions
 
