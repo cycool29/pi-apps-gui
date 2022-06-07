@@ -46,6 +46,7 @@ chmod +x ./gui
 - Announcement text label
 - Fix app info tab change its size when changing category
 - Support multi-installing
+- Try to add install/uninstall buttons on app list for power users 
 
 ## Suggestions
 
@@ -65,5 +66,9 @@ You can submit suggestions by opening a new issue.
 
 [Pi-Apps](https://github.com/Botspot/pi-apps) is an open source project developed by [Botspot](https://github.com/Botspot).
 I am just creating another GUI for it.
+
+## License
+
+This project is licensed under the GNU General Public License v3.0. See the [COPYING](COPYING) file for more info.
 
 
