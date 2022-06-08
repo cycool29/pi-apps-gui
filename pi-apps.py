@@ -504,8 +504,12 @@ search_column = [
     [
         sg.pin(sg.Button(key='-MENU BACK-',
                image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False, tooltip='Return to category list')),
+        
         sg.Column([[sg.Button(key='-UPDATES-',
                               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False, tooltip='View updatable apps')]], element_justification='r', expand_x=True),
+        
+        sg.Text('', size=(0, 2)),
+    
     ],
 ]
 

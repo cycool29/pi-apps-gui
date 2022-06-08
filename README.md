@@ -40,13 +40,13 @@ chmod +x ./gui
 - **Dual-pane Layout in a Window** - the app info tab and app list tab are in one window, so loading categories and apps are a little bit faster.
 
 ## To-do
-- Add theme selection
-- Make tray icon
-- Write another settings for togggling features (theme, tray icon, etc...)
-- Announcement text label
-- Fix app info tab change its size when changing category
-- Support multi-installing
-- Try to add install/uninstall buttons on app list for power users 
+- [ ] Add theme selection
+- [ ] Make tray icon
+- [ ] Write another settings for toggling features (theme, tray icon, etc...)
+- [ ] Announcement text label
+- [x] Fix app info tab change its size when changing category
+- [ ] Support multi-installing
+- [ ] Try to add install/uninstall buttons on app list for power users 
 
 ## Suggestions
 
