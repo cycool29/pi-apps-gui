@@ -504,11 +504,9 @@ search_column = [
     [
         sg.pin(sg.Button(key='-MENU BACK-',
                image_filename=f'{DIRECTORY}/icons/back.png', button_text=' ', visible=False, tooltip='Return to category list')),
-        
+        sg.Text(' ', size=(0, 2)),
         sg.Column([[sg.Button(key='-UPDATES-',
                               image_filename=f'{DIRECTORY}/icons/categories/Updates.png', button_text=' ', visible=False, tooltip='View updatable apps')]], element_justification='r', expand_x=True),
-        
-        sg.Text('', size=(0, 2)),
     
     ],
 ]
@@ -569,6 +567,7 @@ window = sg.Window("Pi-Apps", layout,
 # Configure window
 window['-SEARCH-'].Widget.configure(compound='left', width=0, height=0)
 window['-APP LIST-'].Widget.configure(show='tree')
+window.set_cursor('')
 window.Element('-DESCRIPTION-').bind("<FocusIn>", '+FOCUS_IN+')
 window.Element('-DESCRIPTION-').bind("<FocusOut>", '+FOCUS_OUT+')
 window['-WEBSITE_2-'].bind('<Enter>', '+MOUSE OVER+')
